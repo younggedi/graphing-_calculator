@@ -37,6 +37,7 @@ vector<string> parser(const string& equation,int& bracket_counter){
         if(it!=operators.end()){
             parsed_equation.push_back(string(1,equation[i]));
             if(equation[i]=='(')bracket_counter++;
+            if(equation[i]==')'&&equation[i+1]=='(')parsed_equation.push_back("*");
         }
         if(equation[i]=='l' && equation.substr(i,2)=="ln"){
             parsed_equation.push_back("ln");
@@ -104,43 +105,25 @@ void try_solve(Node* x,double& current_x) {
     try_solve(x->next[0],current_x);
     try_solve(x->next[1],current_x);
     if(operator_precedence[x->type]==7&&x->keyword=="x"){
-            x->result=current_x;
-            x->value=current_x;
+        x->result=current_x;
+        x->value=current_x;
+        }
+    if(operator_precedence[x->type]==8){
+        double bbc=(x->next[0])->result;
+        x->result=bbc;
+        }
+    if(operator_precedence[x->type]==9){
+        operator_keyword(x);
         }
     auto it=main_operator.find(x->type);
         if(it!=main_operator.end())operator_solver(x);
 }
-//function to push the result of the solution in the bracket up to the bracket so as to be used by the next operator
-void resolve_brackets(Node* x) {
-    if (!x)
-        return;
-    resolve_brackets(x->next[0]);
-    resolve_brackets(x->next[1]);
-        if(operator_precedence[x->type]==8){
-            double bbc=(x->next[0])->result;
-            x->result=bbc;
-        }
-
-}
-//function to traverse the tree and solve keywords according to the their branch node
-void resolve_keywords(Node* x) {
-    if (!x)
-        return;
-    resolve_keywords(x->next[0]);
-    resolve_keywords(x->next[1]);
-
-        if(operator_precedence[x->type]==9){
-            operator_keyword(x);
-        }
-
-}
 // function to free the dynamically allocated nodes
-void free(Node* x) {
+void free_ast(Node* x) {
     if (!x)
         return;
-    free(x->next[0]);
-    free(x->next[1]);
-
+    free_ast(x->next[0]);
+    free_ast(x->next[1]);
         delete x;
 }
 
