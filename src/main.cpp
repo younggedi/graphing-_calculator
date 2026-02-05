@@ -1,5 +1,5 @@
 #include "graph_logic/graph.hpp"
-int main()
+int main() 
 {
     int no_of_equation=1; 
     cout <<"Enter an number equation"<<endl;
@@ -25,13 +25,11 @@ int main()
     
     double start=0;
     double stop=1;
-    double step=0.01;
+    double step=0.001;
     cout<<"enter your start: "<<endl;
     cin>>start;
     cout<<"enter your stop:"<<endl;
     cin>>stop;
-    cout<<"enter your step:"<<endl;
-    cin>>step;
     Node* eq=NULL;
     vector<vector<double>> yvalues;
     vector<vector<double>> xvalues;
@@ -55,25 +53,126 @@ int main()
         xvalues.push_back(subxvalues);
         free_ast(eq);
     }
+    LineBatchRenderer batchRenderer;
+    ColorManager colorManager;
+    sf::Clock clock;
+
+    Camera camera;
+
+    // Zoom parameters (cursor-relative zoom)
+    const float zoomFactor = 1.2f;
+    const float minScale = 0.1f;
+    const float maxScale = 500.0f;
+
+    // Panning state (middle mouse drag)
+    bool isPanning = false;
+    sf::Vector2f panStartMouse;
+    sf::Vector2f panStartOffset;
+
+    // Cache geometry so we don't rebuild all vertices every frame
+    bool geometryDirty = true;
 
     sf::RenderWindow window( sf::VideoMode( { SCREEN_WIDTH, SCREEN_HEIGHT } ), "SFMLstuff!" );
-	while ( window.isOpen() )
-	{
-		while ( const std::optional event = window.pollEvent() )
-		{
-			if ( event->is<sf::Event::Closed>() )
-				window.close();
-		}
+    window.setFramerateLimit(60);
+	while ( window.isOpen() ){
+        float deltaTime = clock.restart().asSeconds();
+        
+            while ( const std::optional event = window.pollEvent() )
+            {
+            
+                if ( event->is<sf::Event::Closed>())window.close();
 
-        window.clear();
-        DrawLine(originX,0,originX,SCREEN_HEIGHT,"white",window);
-        DrawLine(0,originY,SCREEN_WIDTH,originY,"white",window);
-        for(int no=0;no<no_of_equation;no++){
-            for(int i=0;i<xvalues[no].size()-1;i++){
-                Drawminiline(xvalues[no][i],yvalues[no][i],xvalues[no][i+1],yvalues[no][i+1],color_list[no],window,50,20);
+                if (const auto* wheelEv = event->getIf<sf::Event::MouseWheelScrolled>()) {
+                    if (wheelEv->wheel == sf::Mouse::Wheel::Vertical && wheelEv->delta != 0.0f) {
+                        const sf::Vector2f mousePos(static_cast<float>(wheelEv->position.x),
+                                                    static_cast<float>(wheelEv->position.y));
+
+                        // Keep the graph coordinate under the cursor fixed while zooming
+                        const sf::Vector2f graphPosBefore = camera.screenToGraph(mousePos.x, mousePos.y);
+
+                        const float zoom = (wheelEv->delta > 0.0f) ? zoomFactor : (1.0f / zoomFactor);
+                        camera.scaleX = std::clamp(camera.scaleX * zoom, minScale, maxScale);
+                        camera.scaleY = std::clamp(camera.scaleY * zoom, minScale, maxScale);
+
+                        const sf::Vector2f graphPosAfter = camera.screenToGraph(mousePos.x, mousePos.y);
+                        camera.offsetX += graphPosAfter.x - graphPosBefore.x;
+                        camera.offsetY += graphPosAfter.y - graphPosBefore.y;
+
+                        geometryDirty = true;
+                    }
+                }
+
+                if (const auto* pressEv = event->getIf<sf::Event::MouseButtonPressed>()) {
+                    if (pressEv->button == sf::Mouse::Button::Middle) {
+                        isPanning = true;
+                        panStartMouse = sf::Vector2f(static_cast<float>(pressEv->position.x),
+                                                     static_cast<float>(pressEv->position.y));
+                        panStartOffset = sf::Vector2f(camera.offsetX, camera.offsetY);
+                    }
+                }
+
+                if (const auto* releaseEv = event->getIf<sf::Event::MouseButtonReleased>()) {
+                    if (releaseEv->button == sf::Mouse::Button::Middle) {
+                        isPanning = false;
+                    }
+                }
+
+                if (const auto* moveEv = event->getIf<sf::Event::MouseMoved>()) {
+                    if (isPanning) {
+                        const sf::Vector2f currentMouse(static_cast<float>(moveEv->position.x),
+                                                        static_cast<float>(moveEv->position.y));
+                        const sf::Vector2f delta = currentMouse - panStartMouse;
+
+                        // Convert pixel delta to graph-coordinate delta
+                        camera.offsetX = panStartOffset.x - delta.x / camera.scaleX;
+                        camera.offsetY = panStartOffset.y + delta.y / camera.scaleY;
+
+                        geometryDirty = true;
+                    }
+                }
+
+                if (const auto* keyEv = event->getIf<sf::Event::KeyPressed>()) {
+                    if (keyEv->code == sf::Keyboard::Key::Escape) {
+                        window.close();
+                    }
+                    if (keyEv->code == sf::Keyboard::Key::Home) {
+                        camera = Camera{};
+                        geometryDirty = true;
+                    }
+                }
             }
-        }
-		window.display();
-	}
-	
+
+            if (geometryDirty) {
+                batchRenderer.clear();
+                drawAxes(batchRenderer, camera);
+                drawGraphLines(xvalues, yvalues, color_list, batchRenderer, colorManager, camera);
+                geometryDirty = false;
+            }
+        
+            // Rendering
+            window.clear(sf::Color(20, 20, 30)); // Clear with background color
+        
+            // Draw all batched lines at once (much faster than individual draw calls)
+            batchRenderer.render(window);
+
+            // Optional: draw a simple crosshair at the cursor
+            const sf::Vector2i mousePos = sf::Mouse::getPosition(window);
+            if (mousePos.x >= 0 && mousePos.x < SCREEN_WIDTH &&
+                mousePos.y >= 0 && mousePos.y < SCREEN_HEIGHT) {
+                const float mx = static_cast<float>(mousePos.x);
+                const float my = static_cast<float>(mousePos.y);
+
+                const sf::Vertex crosshair[] = {
+                    {{mx - 10.0f, my}, sf::Color::Green},
+                    {{mx + 10.0f, my}, sf::Color::Green},
+                    {{mx, my - 10.0f}, sf::Color::Green},
+                    {{mx, my + 10.0f}, sf::Color::Green},
+                };
+                window.draw(crosshair, 4, sf::PrimitiveType::Lines);
+            }
+        
+            window.display();
+    }
+        
 }
+    
