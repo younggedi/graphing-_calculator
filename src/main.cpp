@@ -2,7 +2,7 @@
 int main() 
 {
     int no_of_equation=1; 
-    cout <<"Enter an number equation"<<endl;
+    cout <<"Enter your desired number of equation"<<endl;
     cin>>no_of_equation; 
     vector<vector<string>> example;
     vector <int> bracket_counter;
@@ -11,10 +11,10 @@ int main()
     for(int i=0;i<no_of_equation;i++){
         int bracket=0;
         string equation,colors;
-        cout <<"Enter an equation "<<(i+1)<<endl;
+        cout <<"Enter thesss equation "<<(i+1)<<endl;
         cin>>ws;
         getline(cin, equation);
-        cout <<"Enter your color for equation "<<(i+1)<<endl;
+        cout <<"Enter your color of choice for equation "<<(i+1)<<endl;
         cin>>colors;
         color_list.push_back(colors);
         vector<string> subexample;
@@ -58,14 +58,30 @@ int main()
     sf::Clock clock;
 
     Camera camera;
+    std::vector<AxisLabel> axisLabels;
+    std::vector<sf::Text> axisTexts;
+
+    sf::Font axisFont;
+    constexpr unsigned int axisFontSize = 14;
+    const bool axisFontLoaded =
+        axisFont.openFromFile("C:/Windows/Fonts/consola.ttf") ||
+        axisFont.openFromFile("C:/Windows/Fonts/segoeui.ttf") ||
+        axisFont.openFromFile("C:/Windows/Fonts/arial.ttf") ||
+        axisFont.openFromFile("build/_deps/sfml-src/examples/keyboard/resources/Tuffy.ttf");
+
+    if (!axisFontLoaded) {
+        std::cerr << "Warning: could not load a font; axis labels (numbers) will not be drawn.\n"
+                  << "Provide a .ttf and update the path in src/main.cpp.\n";
+    }
 
     // Zoom parameters (cursor-relative zoom)
     const float zoomFactor = 1.2f;
     const float minScale = 0.1f;
     const float maxScale = 500.0f;
 
-    // Panning state (middle mouse drag)
+    // Panning state (left mouse drag; middle mouse also supported)
     bool isPanning = false;
+    sf::Mouse::Button panButton = sf::Mouse::Button::Left;
     sf::Vector2f panStartMouse;
     sf::Vector2f panStartOffset;
 
@@ -103,8 +119,11 @@ int main()
                 }
 
                 if (const auto* pressEv = event->getIf<sf::Event::MouseButtonPressed>()) {
-                    if (pressEv->button == sf::Mouse::Button::Middle) {
+                    if (!isPanning &&
+                        (pressEv->button == sf::Mouse::Button::Left ||
+                         pressEv->button == sf::Mouse::Button::Middle)) {
                         isPanning = true;
+                        panButton = pressEv->button;
                         panStartMouse = sf::Vector2f(static_cast<float>(pressEv->position.x),
                                                      static_cast<float>(pressEv->position.y));
                         panStartOffset = sf::Vector2f(camera.offsetX, camera.offsetY);
@@ -112,7 +131,7 @@ int main()
                 }
 
                 if (const auto* releaseEv = event->getIf<sf::Event::MouseButtonReleased>()) {
-                    if (releaseEv->button == sf::Mouse::Button::Middle) {
+                    if (isPanning && releaseEv->button == panButton) {
                         isPanning = false;
                     }
                 }
@@ -124,8 +143,8 @@ int main()
                         const sf::Vector2f delta = currentMouse - panStartMouse;
 
                         // Convert pixel delta to graph-coordinate delta
-                        camera.offsetX = panStartOffset.x - delta.x / camera.scaleX;
-                        camera.offsetY = panStartOffset.y + delta.y / camera.scaleY;
+                        camera.offsetX = panStartOffset.x + delta.x / camera.scaleX;
+                        camera.offsetY = panStartOffset.y - delta.y / camera.scaleY;
 
                         geometryDirty = true;
                     }
@@ -144,8 +163,39 @@ int main()
 
             if (geometryDirty) {
                 batchRenderer.clear();
-                drawAxes(batchRenderer, camera);
+                axisLabels.clear();
+                drawAxes(batchRenderer, camera, axisLabels);
                 drawGraphLines(xvalues, yvalues, color_list, batchRenderer, colorManager, camera);
+
+                axisTexts.clear();
+                if (axisFontLoaded) {
+                    axisTexts.reserve(axisLabels.size());
+                    for (const auto& label : axisLabels) {
+                        sf::Text text(axisFont, label.text, axisFontSize);
+                        text.setFillColor(sf::Color(255, 255, 255, 200));
+
+                        const sf::FloatRect bounds = text.getLocalBounds();
+                        switch (label.anchor) {
+                            case TextAnchor::CenterTop:
+                                text.setOrigin({bounds.position.x + bounds.size.x / 2.0f, bounds.position.y});
+                                break;
+                            case TextAnchor::CenterBottom:
+                                text.setOrigin({bounds.position.x + bounds.size.x / 2.0f,
+                                                bounds.position.y + bounds.size.y});
+                                break;
+                            case TextAnchor::LeftCenter:
+                                text.setOrigin({bounds.position.x, bounds.position.y + bounds.size.y / 2.0f});
+                                break;
+                            case TextAnchor::RightCenter:
+                                text.setOrigin({bounds.position.x + bounds.size.x,
+                                                bounds.position.y + bounds.size.y / 2.0f});
+                                break;
+                        }
+
+                        text.setPosition(label.position);
+                        axisTexts.push_back(std::move(text));
+                    }
+                }
                 geometryDirty = false;
             }
         
@@ -154,6 +204,11 @@ int main()
         
             // Draw all batched lines at once (much faster than individual draw calls)
             batchRenderer.render(window);
+
+            // Axis labels on top of lines
+            for (const auto& text : axisTexts) {
+                window.draw(text);
+            }
 
             // Optional: draw a simple crosshair at the cursor
             const sf::Vector2i mousePos = sf::Mouse::getPosition(window);
