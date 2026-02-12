@@ -2,7 +2,11 @@
 
 A simple graphing calculator that parses math expressions, evaluates them for a range of `x` values, and renders the resulting curves in an interactive SFML window (pan + zoom).
 
+<<<<<<< HEAD
 ## Features
+=======
+**Features**
+>>>>>>> 1c9b98a3e85265c016152000a39dddd37359d152
 
 - Multiple equations at once (each with a color)
 - Expression parser + AST evaluator (supports `x`)
@@ -11,29 +15,46 @@ A simple graphing calculator that parses math expressions, evaluates them for a 
 - Panning (middle mouse drag)
 - Reset view (`Home`) and quit (`Esc`)
 
+<<<<<<< HEAD
 ## Controls
+=======
+**Controls**
+>>>>>>> 1c9b98a3e85265c016152000a39dddd37359d152
 
 - Mouse wheel: zoom in/out at the cursor
 - Middle mouse drag: pan
 - `Home`: reset view
 - `Esc`: close window
 
+<<<<<<< HEAD
 ## Supported Input
 
 ### Operators
+=======
+** Operators**
+>>>>>>> 1c9b98a3e85265c016152000a39dddd37359d152
 
 - `+`, `-`, `*`, `/`, `^`
 - Parentheses: `(` `)`
 
+<<<<<<< HEAD
 ### Functions
+=======
+###** Functions**
+>>>>>>> 1c9b98a3e85265c016152000a39dddd37359d152
 
 - `sin(...)`, `cos(...)`, `tan(...)`
 - `log(...)` (base 10)
 - `ln(...)` (natural log)
 - `sqrt(...)`
+<<<<<<< HEAD
 
 ### Colors
 
+=======
+  
+**Colors**
+>>>>>>> 1c9b98a3e85265c016152000a39dddd37359d152
 The built-in color names are:
 
 - `white`, `black`, `blue`, `red`, `yellow`, `green`
@@ -72,7 +93,11 @@ Run the executable, then follow the prompts:
 1. Number of equations
 2. Each equation string (uses `x` as the variable)
 3. A color name for each equation
+<<<<<<< HEAD
 4. Start / stop / step for the x-range sampling
+=======
+4. Start/stop
+>>>>>>> 1c9b98a3e85265c016152000a39dddd37359d152
 
 Smaller `step` values produce smoother curves but generate more points (more CPU + memory).
 
@@ -86,4 +111,7 @@ Smaller `step` values produce smoother curves but generate more points (more CPU
 ## Notes / Limitations
 
 - The graph is sampled (discrete points connected by line segments). Very small `step` values can be expensive.
+<<<<<<< HEAD
 - If a function has discontinuities (e.g. `tan(x)`), you may see large “jumps” depending on sampling.
+=======
+>>>>>>> 1c9b98a3e85265c016152000a39dddd37359d152
