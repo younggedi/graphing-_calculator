@@ -3,7 +3,6 @@
 A simple graphing calculator that parses math expressions, evaluates them for a range of `x` values, and renders the resulting curves in an interactive SFML window (pan + zoom).
 
 ## Features
-=======
 
 - Multiple equations at once (each with a color)
 - Expression parser + AST evaluator (supports `x`)
@@ -19,26 +18,23 @@ A simple graphing calculator that parses math expressions, evaluates them for a 
 - `Home`: reset view
 - `Esc`: close window
 
-<<<<<<< HEAD
 ## Supported Input
 
-### Operators
-=======
+## Operators
+
 - `+`, `-`, `*`, `/`, `^`
 - Parentheses: `(` `)`
 
-<<<<<<< HEAD
 ## Functions
 
 - `sin(...)`, `cos(...)`, `tan(...)`
 - `log(...)` (base 10)
 - `ln(...)` (natural log)
 - `sqrt(...)`
-<<<<<<< HEAD
 
 ## Colors
 
-=======
+
 The built-in color names are:
 
 - `white`, `black`, `blue`, `red`, `yellow`, `green`
