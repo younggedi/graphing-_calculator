@@ -2,11 +2,8 @@
 
 A simple graphing calculator that parses math expressions, evaluates them for a range of `x` values, and renders the resulting curves in an interactive SFML window (pan + zoom).
 
-<<<<<<< HEAD
 ## Features
 =======
-**Features**
->>>>>>> 1c9b98a3e85265c016152000a39dddd37359d152
 
 - Multiple equations at once (each with a color)
 - Expression parser + AST evaluator (supports `x`)
@@ -15,11 +12,7 @@ A simple graphing calculator that parses math expressions, evaluates them for a 
 - Panning (middle mouse drag)
 - Reset view (`Home`) and quit (`Esc`)
 
-<<<<<<< HEAD
 ## Controls
-=======
-**Controls**
->>>>>>> 1c9b98a3e85265c016152000a39dddd37359d152
 
 - Mouse wheel: zoom in/out at the cursor
 - Middle mouse drag: pan
@@ -31,17 +24,11 @@ A simple graphing calculator that parses math expressions, evaluates them for a 
 
 ### Operators
 =======
-** Operators**
->>>>>>> 1c9b98a3e85265c016152000a39dddd37359d152
-
 - `+`, `-`, `*`, `/`, `^`
 - Parentheses: `(` `)`
 
 <<<<<<< HEAD
-### Functions
-=======
-###** Functions**
->>>>>>> 1c9b98a3e85265c016152000a39dddd37359d152
+## Functions
 
 - `sin(...)`, `cos(...)`, `tan(...)`
 - `log(...)` (base 10)
@@ -49,12 +36,9 @@ A simple graphing calculator that parses math expressions, evaluates them for a 
 - `sqrt(...)`
 <<<<<<< HEAD
 
-### Colors
+## Colors
 
 =======
-  
-**Colors**
->>>>>>> 1c9b98a3e85265c016152000a39dddd37359d152
 The built-in color names are:
 
 - `white`, `black`, `blue`, `red`, `yellow`, `green`
@@ -65,14 +49,14 @@ Unknown color names fall back to `white`.
 
 This project uses CMake and fetches **SFML 3.0.2** automatically via `FetchContent` (so you don’t need to install SFML separately).
 
-### Requirements
+## Requirements
 
 - CMake 3.28+
 - A C++23 compiler toolchain
   - Windows: Visual Studio 2022 (or newer)
   - Linux/macOS: a recent Clang or GCC
 
-### Configure + Build
+## Configure + Build
 
 ```powershell
 cmake -S . -B build
@@ -84,7 +68,7 @@ The executable is placed under:
 - `build/bin/Debug/main.exe` (Windows, Debug)
 - `build/bin/Release/main.exe` (Windows, Release)
 
-On non-Windows platforms it will typically be under `build/bin/main`.
+On non-Windows platforms, it will typically be under `build/bin/main`.
 
 ## Run
 
@@ -93,13 +77,8 @@ Run the executable, then follow the prompts:
 1. Number of equations
 2. Each equation string (uses `x` as the variable)
 3. A color name for each equation
-<<<<<<< HEAD
 4. Start / stop / step for the x-range sampling
-=======
 4. Start/stop
->>>>>>> 1c9b98a3e85265c016152000a39dddd37359d152
-
-Smaller `step` values produce smoother curves but generate more points (more CPU + memory).
 
 ## Project Layout
 
@@ -108,10 +87,3 @@ Smaller `step` values produce smoother curves but generate more points (more CPU
 - `src/graph_logic/tokenizer.hpp`: tokenization + evaluation traversal helpers
 - `src/graph_logic/AST.hpp`: AST node definitions + AST builder + operator evaluation
 
-## Notes / Limitations
-
-- The graph is sampled (discrete points connected by line segments). Very small `step` values can be expensive.
-<<<<<<< HEAD
-- If a function has discontinuities (e.g. `tan(x)`), you may see large “jumps” depending on sampling.
-=======
->>>>>>> 1c9b98a3e85265c016152000a39dddd37359d152
